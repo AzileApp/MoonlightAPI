@@ -1,0 +1,20 @@
+{
+  "name": "azile-cookie",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "fastify": "^3.27.4",
+    "fs": "^0.0.1-security",
+    "mysql": "^2.18.1",
+    "noblox": "^4.8.5",
+    "noblox.js": "^4.13.1"
+  }
+}
