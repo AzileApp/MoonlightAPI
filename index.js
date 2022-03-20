@@ -5,6 +5,9 @@ const noblox = require('noblox.js');
 const chalk = require('chalk');
 const axios = require('axios');
 const fs = require('fs');
+const fetch = require('node-fetch');
+const HttpsProxyAgent = require("https-proxy-agent")
+const HttpsAgent = new HttpsProxyAgent({host: "52.20.43.222", port: "31112", auth: "stiqnxo8:GJEuVAX23ux7MBMQ"})
 
 console.log(`${chalk.greenBright('[APP] Filter started.')}`);
 
@@ -16,7 +19,7 @@ doTaskSet();
 
 setInterval(() => {
     doTaskSet();
-}, 30000);
+}, 10000);
 
 async function doTaskSet() {
     const con = mysql.createConnection({
@@ -36,25 +39,42 @@ async function doTaskSet() {
         
         result.forEach(async row => {
             try {
-                const user = await noblox.setCookie(row.cookie);
-                const wallPosts = await noblox.getWall(row.group_id);
+                
+                const fetchPosts = await fetch(`https://groups.roblox.com/v2/groups/${row.group_id}/wall/posts`, {agent: HttpsAgent});
+                const wallPosts = await fetchPosts.json();
+                if(fetchPosts.status === 403) {
+                    doTaskSet();
+                }
 
-                console.log(`${chalk.blueBright(`[COOKIE] Logged in as ${user.UserName} | ${user.UserID}`)}`)
-            
+                console.log(wallPosts)
+
                 wallPosts.data.forEach(async post => {
                     await axios.get(`https://azile.app/blacklist.json`).then(data => {
                         data = data.data;
                         words = data.blacklist;
 
-                        words.forEach(word => {
-                            if(post.body.includes(word)){
-                                noblox.deleteWallPost(row.group_id, post.id)
+                        words.forEach(async word => {
+                            if(post.body.toLowerCase().includes(word.toLowerCase())){
+                                const deletePost1 = await fetch(`https://groups.roblox.com/v1/groups/${row.group_id}/wall/posts/${post.id}`, {agent: HttpsAgent, method: 'DELETE', headers: {
+                                    'cookie': `.ROBLOSECURITY=${row.cookie};`
+                                }})
+                                if(deletePost1.status === 403) {
+                                    doTaskSet();
+                                }
+                                const deletePost2 = await fetch(`https://groups.roblox.com/v1/groups/${row.group_id}/wall/posts/${post.id}`, {agent: HttpsAgent, method: 'DELETE', headers: {
+                                    'cookie': `.ROBLOSECURITY=${row.cookie};`,
+                                    'x-csrf-token': `${deletePost1.headers.get('x-csrf-token')}`
+                                }})
+                                if(deletePost2.status === 403) {
+                                    doTaskSet();
+                                }
                                 console.log(`${chalk.redBright(`[FLAG] A post by ${post.poster.user.username} has been deleted for containing the word ${word}.`)}`)
                             }
                         })
                     })
                 })
             } catch (err) {
+                console.log(err)
                 console.error(`\n\n\nAn error occured whilst authenticating.\n\n\n`);
             }
         })
@@ -74,15 +94,8 @@ app.get('/check', function (request, reply) {
         message: 'Forced a filter check, all offending comments should now be removed.'
     })
 })
-app.get('/', function (request, reply) {
-    doTaskSet();
-    reply.send({
-        Endpoint: 'Moonlight',
-        Developer: 'Jonax'
-    })
-})
 
-app.listen(80, '0.0.0.0', (err, address) => {
-    if (err) { console.error(err); }
+app.listen(3000, function (err, address) {
+    if (err) { console.error(err); process.exit(1); }
     console.log(`${chalk.greenBright('[APP] API started.')}`);
 })
