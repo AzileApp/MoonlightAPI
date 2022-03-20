@@ -90,7 +90,7 @@ app.get('/check', function (request, reply) {
     })
 })
 
-app.listen(80, function (err, address) {
+app.listen(80, '0.0.0.0', function (err, address) {
     if (err) { console.error(err); process.exit(1); }
     console.log(`${chalk.greenBright('[APP] API started.')}`);
 })
