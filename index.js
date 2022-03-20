@@ -59,16 +59,10 @@ async function doTaskSet() {
                                 const deletePost1 = await fetch(`https://groups.roblox.com/v1/groups/${row.group_id}/wall/posts/${post.id}`, {agent: HttpsAgent, method: 'DELETE', headers: {
                                     'cookie': `.ROBLOSECURITY=${row.cookie};`
                                 }})
-                                if(deletePost1.status === 403) {
-                                    doTaskSet();
-                                }
                                 const deletePost2 = await fetch(`https://groups.roblox.com/v1/groups/${row.group_id}/wall/posts/${post.id}`, {agent: HttpsAgent, method: 'DELETE', headers: {
                                     'cookie': `.ROBLOSECURITY=${row.cookie};`,
                                     'x-csrf-token': `${deletePost1.headers.get('x-csrf-token')}`
                                 }})
-                                if(deletePost2.status === 403) {
-                                    doTaskSet();
-                                }
                                 console.log(`${chalk.redBright(`[FLAG] A post by ${post.poster.user.username} has been deleted for containing the word ${word}.`)}`)
                             }
                         })
