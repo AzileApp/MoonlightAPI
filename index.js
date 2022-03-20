@@ -15,6 +15,18 @@ process.on('unhandledRejection', (reason, promise) => {
     console.log(reason.stack || reason)
 })
 
+let con = mysql.createConnection({
+        database: "azileapp_moonlight",
+        host: "91.210.103.4",
+        user: "azileapp_admin",
+        password: "Azilesunlight?"
+    });
+
+    con.connect(function(err) {
+        if (err) throw err;
+        console.log(`${chalk.yellowBright('[DATABASE] Database connected & synced.')}`);
+    });
+
 doTaskSet();
 
 setInterval(() => {
@@ -85,17 +97,6 @@ app.get('/check', function (request, reply) {
 })
 
 app.listen(80, function (err, address) {
-    const con = mysql.createConnection({
-        database: "azileapp_moonlight",
-        host: "91.210.103.4",
-        user: "azileapp_admin",
-        password: "Azilesunlight?"
-    });
-
-    con.connect(function(err) {
-        if (err) throw err;
-        console.log(`${chalk.yellowBright('[DATABASE] Database connected & synced.')}`);
-    });
     if (err) { console.error(err); process.exit(1); }
     console.log(`${chalk.greenBright('[APP] API started.')}`);
 })
