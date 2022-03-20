@@ -84,7 +84,7 @@ app.get('/check', function (request, reply) {
     })
 })
 
-app.listen(3000, function (err, address) {
+app.listen(80, function (err, address) {
     const con = mysql.createConnection({
         database: "azileapp_moonlight",
         host: "91.210.103.4",
