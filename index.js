@@ -7,12 +7,12 @@ const axios = require('axios');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const HttpsProxyAgent = require("https-proxy-agent")
-const HttpsAgent = new HttpsProxyAgent({host: "52.20.43.222", port: "31112", auth: "stiqnxo8:GJEuVAX23ux7MBMQ"})
+const HttpsAgent = new HttpsProxyAgent({host: "52.20.43.222", port: "31112", auth: "stiqnxo8:GJEuVAX23ux7MBMQ_country-UnitedStates"})
 
 console.log(`${chalk.greenBright('[APP] Filter started.')}`);
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.log(reason.stack || reason)
+
 })
 
 let con = mysql.createConnection({
@@ -46,14 +46,18 @@ async function doTaskSet() {
                 if(fetchPosts.status === 403) {
                     doTaskSet();
                 }
+ if(fetchPosts.status === 503) {
+                    doTaskSet();
+                }
 
                 console.log(wallPosts)
 
                 wallPosts.data.forEach(async post => {
-                    await axios.get(`https://azile.app/blacklist.json`).then(data => {
-                        data = data.data;
+                 const wordsdb =  await fetch(`https://azile.app/blacklist.json`)
+const blacklisted = await wordsdb.json();
+                        data = blacklisted.data;
                         words = data.blacklist;
-
+ console.log(data)
                         words.forEach(async word => {
                             if(post.body.toLowerCase().includes(word.toLowerCase())){
                                 const deletePost1 = await fetch(`https://groups.roblox.com/v1/groups/${row.group_id}/wall/posts/${post.id}`, {agent: HttpsAgent, method: 'DELETE', headers: {
@@ -65,11 +69,10 @@ async function doTaskSet() {
                                 }})
                                 console.log(`${chalk.redBright(`[FLAG] A post by ${post.poster.user.username} has been deleted for containing the word ${word}.`)}`)
                             }
-                        })
+                       
                     })
                 })
             } catch (err) {
-                console.log(err)
                 console.error(`\n\n\nAn error occured whilst authenticating.\n\n\n`);
             }
         })
@@ -81,7 +84,12 @@ async function doTaskSet() {
 
 const fastify = require('fastify');
 const app = fastify();
-
+app.get('/', function (request, reply) {
+    reply.send({
+        Endpoint: 'Moonlight',
+        Developer: 'Jonax'
+    })
+})
 app.get('/check', function (request, reply) {
     doTaskSet();
     reply.send({
